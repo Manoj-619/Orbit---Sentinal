@@ -1,0 +1,63 @@
+name: Cinematic mission promo
+on:
+  push:
+    paths: ['scripts/promo48/**', '.github/workflows/promo48.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  film:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare renderer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          pip install pillow numpy
+          cd frontend
+          npm ci
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+          cd ..
+          mkdir -p scripts/promo48/three
+          cp frontend/node_modules/three/build/three.module.js frontend/node_modules/three/build/three.core.js scripts/promo48/three/
+          cp frontend/public/demo/crossing.json scripts/promo48/mission.json
+          python -c "import base64,pathlib;p=pathlib.Path('scripts/promo48');(p/'earth.png').write_bytes(base64.b64decode((p/'earth.b64').read_text()))"
+          python scripts/promo48/score.py
+      - name: Render mission film
+        run: NODE_PATH="$PWD/frontend/node_modules" node scripts/promo48/capture.cjs
+      - name: Inspect export
+        run: |
+          python - <<'PY'
+          import base64,json,subprocess
+          from pathlib import Path
+          from PIL import Image
+          from io import BytesIO
+          p=Path('scripts/promo48');sheet=Image.new('RGB',(1440,540))
+          for k in range(6):sheet.paste(Image.open(p/f'poster-{k}.png').resize((480,270)),((k%3)*480,(k//3)*270))
+          buf=BytesIO();sheet.save(buf,format='JPEG',quality=88);print('CONTACT_SHEET_BASE64:'+base64.b64encode(buf.getvalue()).decode())
+          report=json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show_streams','-show_format','-of','json',str(p/'Orbit_Sentinal_Cinematic_48s.mp4')]))
+          video=next(s for s in report['streams'] if s['codec_type']=='video')
+          assert (video['width'],video['height'],video['codec_name'],video['pix_fmt'])==(1920,1080,'h264','yuv420p')
+          assert float(report['format']['duration'])==48 and video['nb_frames']=='1152'
+          assert any(s['codec_type']=='audio' for s in report['streams'])
+          (p/'export-report.json').write_text(json.dumps(report,indent=2))
+          print('VERIFIED: 48 seconds, 1920x1080, 24 fps, H.264/AAC')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Orbit-Sentinal-Cinematic-48s
+          path: |
+            scripts/promo48/Orbit_Sentinal_Cinematic_48s.mp4
+            scripts/promo48/poster-*.png
+            scripts/promo48/export-report.json
+          retention-days: 90
+          compression-level: 0

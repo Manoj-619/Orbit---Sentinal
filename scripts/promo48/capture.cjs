@@ -1,0 +1,9 @@
+const { chromium }=require('playwright');const {spawn}=require('node:child_process');const path=require('node:path');
+(async()=>{const server=spawn('python3',['-m','http.server','4189','--bind','127.0.0.1'],{cwd:__dirname,stdio:'ignore'});let browser;
+try{for(let i=0;i<50;i++){try{if((await fetch('http://127.0.0.1:4189')).ok)break;}catch{}await new Promise(r=>setTimeout(r,200));}
+browser=await chromium.launch({args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});const page=await browser.newPage({viewport:{width:1280,height:720}});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:4189');await page.waitForFunction(()=>window.ready);await page.evaluate(()=>document.fonts.ready);
+for(const [i,t] of [2,9,17,27,36,44].entries()){await page.evaluate(t=>window.draw(t),t);await page.screenshot({path:path.join(__dirname,`poster-${i}.png`)});}if(process.argv.includes('--preview')){if(errors.length)throw Error(errors.join('\n'));return;}
+const out=path.join(__dirname,'Orbit_Sentinal_Cinematic_48s.mp4');const ff=spawn('ffmpeg',['-y','-f','image2pipe','-vcodec','png','-r','24','-i','-','-i',path.join(__dirname,'score.wav'),'-vf','scale=1920:1080:flags=lanczos','-c:v','libx264','-preset','fast','-crf','18','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-movflags','+faststart','-t','48',out],{stdio:['pipe','ignore','inherit']});
+const done=new Promise((resolve,reject)=>ff.on('close',c=>c===0?resolve():reject(Error('ffmpeg '+c))));
+for(let i=0;i<1152;i++){await page.evaluate(t=>window.draw(t),i/24);const png=await page.screenshot();if(!ff.stdin.write(png))await new Promise(r=>ff.stdin.once('drain',r));if(i%120===0)console.log('Rendered',i,'/1152');}ff.stdin.end();await done;if(errors.length)throw Error(errors.join('\n'));console.log('COMPLETE',out);
+}finally{await browser?.close();server.kill();}})().catch(e=>{console.error(e);process.exitCode=1;});
