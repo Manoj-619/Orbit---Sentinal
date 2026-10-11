@@ -1,4 +1,4 @@
-"""Copy only the reviewed ORBIT SENTINAL project tree into its standalone repository."""
+"""Copy the reviewed project into its standalone repository without its old Git history."""
 from pathlib import Path
 import shutil
 import sys
@@ -11,8 +11,8 @@ for path in source.rglob("*"):
     if not path.is_file() or ".git" in path.relative_to(source).parts:
         continue
     relative = path.relative_to(source)
-    if str(relative) == "README.md":
-        continue  # Preserve the new standalone README.
+    if str(relative) == "README.md" or str(relative).startswith(".github/workflows/"):
+        continue
     target = destination / relative
     target.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -22,7 +22,5 @@ for path in source.rglob("*"):
         continue
     content = content.replace(old + "/tree/orbit-sentinel", new)
     content = content.replace(old, new).replace("ORBIT SENTINEL", "ORBIT SENTINAL")
-    if str(relative) == ".github/workflows/browser.yml":
-        content = content.replace("branches: [orbit-sentinel]", "branches: [main]")
     target.write_text(content)
 print("Imported project files, binary assets, and standalone repository links.")
