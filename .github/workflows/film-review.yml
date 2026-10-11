@@ -1,0 +1,40 @@
+name: Film export review
+on:
+  push:
+    paths: ['.github/workflows/film-review.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: Orbit-Sentinal-LinkedIn-Film
+          run-id: 38160866099
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: review
+      - run: pip install pillow
+      - name: Inspect export
+        run: |
+          python - <<'PY'
+          import base64,json
+          from pathlib import Path
+          from PIL import Image,ImageDraw
+          from io import BytesIO
+          posters=sorted(Path('review').rglob('poster-*.jpg'))
+          assert len(posters)==6
+          sheet=Image.new('RGB',(1440,540))
+          for k,p in enumerate(posters):
+              im=Image.open(p);assert im.size==(1920,1080)
+              sheet.paste(im.resize((480,270)),((k%3)*480,(k//3)*270))
+          buf=BytesIO();sheet.save(buf,format='JPEG',quality=83)
+          print('CONTACT_SHEET_BASE64:'+base64.b64encode(buf.getvalue()).decode())
+          report=json.loads(next(Path('review').rglob('export-report.json')).read_text())
+          print('EXPORT_REPORT:'+json.dumps({'duration':report['format']['duration'],'bytes':report['format']['size'],'streams':[(x['codec_type'],x['codec_name']) for x in report['streams']]}))
+          PY
