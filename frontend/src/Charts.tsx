@@ -25,22 +25,22 @@ export function EncounterPlot({ event }: { event: Encounter }) {
     >
       <defs>
         <radialGradient id="cloud">
-          <stop stopColor="#ff866e" stopOpacity=".22" />
-          <stop offset="1" stopColor="#ff866e" stopOpacity=".025" />
+          <stop stopColor="#ff6b81" stopOpacity=".22" />
+          <stop offset="1" stopColor="#ff6b81" stopOpacity=".025" />
         </radialGradient>
       </defs>
       {[50, 85, 120, 155, 190, 225, 260].map((v) => (
-        <line key={"x" + v} x1={v} y1="20" x2={v} y2="235" stroke="#1a2b38" />
+        <line key={"x" + v} x1={v} y1="20" x2={v} y2="235" stroke="#1b2350" />
       ))}
       {[30, 65, 100, 135, 170, 205, 240].map((v) => (
-        <line key={"y" + v} x1="30" y1={v} x2="290" y2={v} stroke="#1a2b38" />
+        <line key={"y" + v} x1="30" y1={v} x2="290" y2={v} stroke="#1b2350" />
       ))}
       <line
         x1="30"
         y1="135"
         x2="290"
         y2="135"
-        stroke="#476073"
+        stroke="#4a5688"
         strokeDasharray="3 5"
       />
       <line
@@ -48,7 +48,7 @@ export function EncounterPlot({ event }: { event: Encounter }) {
         y1="20"
         x2="160"
         y2="235"
-        stroke="#476073"
+        stroke="#4a5688"
         strokeDasharray="3 5"
       />
       <g
@@ -58,14 +58,14 @@ export function EncounterPlot({ event }: { event: Encounter }) {
           rx={event.ellipse_3sigma_m[0] * factor}
           ry={event.ellipse_3sigma_m[1] * factor}
           fill="url(#cloud)"
-          stroke="#ff826e"
+          stroke="#ff6b81"
           strokeOpacity=".5"
         />
         <ellipse
           rx={(event.ellipse_3sigma_m[0] * factor) / 3}
           ry={(event.ellipse_3sigma_m[1] * factor) / 3}
           fill="none"
-          stroke="#ff826e"
+          stroke="#ff6b81"
           strokeDasharray="3 4"
           strokeOpacity=".6"
         />
@@ -74,12 +74,12 @@ export function EncounterPlot({ event }: { event: Encounter }) {
         cx="160"
         cy="135"
         r={Math.max(2, event.hard_body_radius_m * factor)}
-        fill="#58e5cb"
+        fill="#2ee6a8"
         fillOpacity=".3"
-        stroke="#58e5cb"
+        stroke="#2ee6a8"
       />
-      <path d={`M ${x - 4} ${y} h 8 M ${x} ${y - 4} v 8`} stroke="#ff826e" />
-      <text x="30" y="253" fill="#819bad" fontSize="9" fontFamily="monospace">
+      <path d={`M ${x - 4} ${y} h 8 M ${x} ${y - 4} v 8`} stroke="#ff6b81" />
+      <text x="30" y="253" fill="#8b94bd" fontSize="9" fontFamily="monospace">
         ±{scale.toFixed(0)} m · 3σ ellipse · encounter plane
       </text>
     </svg>
@@ -109,9 +109,9 @@ export function SearchPlot({ result }: { result: Result }) {
             x2="465"
             y1={y(10 ** exponent)}
             y2={y(10 ** exponent)}
-            stroke="#192a36"
+            stroke="#1b2350"
           />
-          <text x="9" y={y(10 ** exponent) + 3} fill="#8095a7" fontSize="9">
+          <text x="9" y={y(10 ** exponent) + 3} fill="#8b94bd" fontSize="9">
             10^{exponent}
           </text>
         </g>
@@ -121,10 +121,10 @@ export function SearchPlot({ result }: { result: Result }) {
         x2="465"
         y1={y(threshold)}
         y2={y(threshold)}
-        stroke="#ffb55d"
+        stroke="#ffc46b"
         strokeDasharray="4 5"
       />
-      <text x="350" y={y(threshold) - 5} fill="#ffb55d" fontSize="9">
+      <text x="350" y={y(threshold) - 5} fill="#ffc46b" fontSize="9">
         ACCEPTANCE LIMIT
       </text>
       {candidates.map((candidate, i) => (
@@ -135,7 +135,7 @@ export function SearchPlot({ result }: { result: Result }) {
           }
           cy={y(candidate.worst_probability)}
           r="2.4"
-          fill={candidate.feasible ? "#58e5cb" : "#ff826e"}
+          fill={candidate.feasible ? "#2ee6a8" : "#ff6b81"}
           opacity=".55"
         />
       ))}
@@ -149,18 +149,18 @@ export function SearchPlot({ result }: { result: Result }) {
           cy={y(result.maneuver.worst_stress_probability)}
           r="6"
           fill="none"
-          stroke="#fff"
+          stroke="#e7ebff"
           strokeWidth="1.5"
         />
       )}
-      <text x="48" y="185" fill="#819bad" fontSize="9">
+      <text x="48" y="185" fill="#8b94bd" fontSize="9">
         0 m/s
       </text>
-      <text x="380" y="185" fill="#819bad" fontSize="9">
+      <text x="380" y="185" fill="#8b94bd" fontSize="9">
         {result.parameters.max_delta_v_ms.toFixed(2)} m/s Δv
       </text>
       {!candidates.length && (
-        <text x="140" y="90" fill="#58e5cb" fontSize="12">
+        <text x="140" y="90" fill="#2ee6a8" fontSize="12">
           NO MANEUVER SEARCH REQUIRED
         </text>
       )}
