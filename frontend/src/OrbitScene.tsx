@@ -28,7 +28,7 @@ const globeVertex = `varying vec3 vNormal; varying vec3 vPosition; void main(){v
 const globeFragment = `varying vec3 vNormal;varying vec3 vPosition;
 float hash(vec3 p){p=fract(p*.3183099+vec3(.1,.2,.3));p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
 float noise(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1)),f.x),f.y),f.z);}
-void main(){vec3 p=normalize(vPosition);float continent=noise(p*3.)*.65+noise(p*9.)*.25+noise(p*25.)*.1;float land=smoothstep(.49,.54,continent);vec3 ocean=vec3(.012,.046,.085),ground=vec3(.035,.18,.19);vec3 color=mix(ocean,ground,land);float lat=asin(p.z),lon=atan(p.y,p.x);float grid=max(pow(abs(cos(lat*18.)),85.),pow(abs(cos(lon*18.)),85.));color+=grid*vec3(.016,.07,.09);float light=.2+.8*max(dot(normalize(vNormal),normalize(vec3(-.4,.6,1.))),0.);float rim=pow(1.-abs(vNormal.z),3.);color=color*light+rim*vec3(.03,.14,.22);gl_FragColor=vec4(color,1.);}`;
+void main(){vec3 p=normalize(vPosition);float continent=noise(p*3.)*.65+noise(p*9.)*.25+noise(p*25.)*.1;float land=smoothstep(.49,.54,continent);vec3 ocean=vec3(.014,.03,.09),ground=vec3(.05,.38,.32);vec3 color=mix(ocean,ground,land);float lat=asin(p.z),lon=atan(p.y,p.x);float grid=max(pow(abs(cos(lat*18.)),85.),pow(abs(cos(lon*18.)),85.));color+=grid*vec3(.03,.11,.16);float light=.2+.8*max(dot(normalize(vNormal),normalize(vec3(-.4,.6,1.))),0.);float rim=pow(1.-abs(vNormal.z),3.);color=color*light+rim*vec3(.05,.19,.33);gl_FragColor=vec4(color,1.);}`;
 
 export default function OrbitScene({
   result,
@@ -74,7 +74,7 @@ export default function OrbitScene({
     const atmosphere = new THREE.Mesh(
       new THREE.SphereGeometry(1.026, 64, 48),
       new THREE.MeshBasicMaterial({
-        color: 0x176b88,
+        color: 0x3a4dff,
         transparent: true,
         opacity: 0.1,
         side: THREE.BackSide,
@@ -102,7 +102,7 @@ export default function OrbitScene({
       new THREE.Points(
         starsGeometry,
         new THREE.PointsMaterial({
-          color: 0x62809c,
+          color: 0x8fa0d8,
           size: 0.013,
           transparent: true,
           opacity: 0.7,
@@ -126,7 +126,7 @@ export default function OrbitScene({
     }
     const markers: THREE.Mesh[] = [];
     for (const [i, obj] of result.objects.entries()) {
-      const color = i === 0 ? 0x58e5cb : i === 1 ? 0xff826e : 0x6e8bfd;
+      const color = i === 0 ? 0x2ee6a8 : i === 1 ? 0xff6b81 : 0x7c85ff;
       line(obj, color, i === 0 ? 0.3 : 0.65);
       const marker = new THREE.Mesh(
         new THREE.SphereGeometry(i === 0 ? 0.014 : 0.01, 12, 8),
@@ -135,9 +135,9 @@ export default function OrbitScene({
       scene.add(marker);
       markers.push(marker);
     }
-    const maneuverLine = line(result.after_trajectory, 0x58e5cb, 0.9);
+    const maneuverLine = line(result.after_trajectory, 0x2ee6a8, 0.9);
     maneuverLine.visible = after;
-    const grid = new THREE.GridHelper(5, 24, 0x153544, 0x0d202f);
+    const grid = new THREE.GridHelper(5, 24, 0x1e2a5e, 0x131a3a);
     grid.rotateX(Math.PI / 2);
     grid.position.z = -1.35;
     scene.add(grid);
